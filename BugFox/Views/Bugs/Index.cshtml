@@ -1,0 +1,127 @@
+﻿@model BugFox.ViewModels.BugsViewModel
+@using (Html.BeginForm("Index", "Bugs", FormMethod.Post))
+{
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Submit New Bug</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="bugType">Type</label>
+                            </div>
+                            <select class="custom-select" id="bugType" asp-for="Bug.Type">
+                                <option selected>Choose...</option>
+                                <option value="UI">UI</option>
+                                <option value="General">General</option>
+                                <option value="Feature">Feature</option>
+                                <option value="Networking">Networking</option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="bugPriority">Priority</label>
+                            </div>
+                            <select class="custom-select" id="bugPriority" asp-for="Bug.Priority">
+                                <option selected>Choose...</option>
+                                <option value="@Convert.ToInt32("0")">Critical</option>
+                                <option value="@Convert.ToInt32("1")">High</option>
+                                <option value="@Convert.ToInt32("2")">Normal</option>
+                                <option value="@Convert.ToInt32("3")">Low</option>
+                            </select>
+                        </div>
+                        <label for="bugDescription">Description</label>
+                        <textarea class="form-control" id="bugDescription" rows="7" asp-for="Bug.Description"></textarea>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="bugAssignedTo">Assignee</label>
+                            </div>
+                            <select class="custom-select" id="bugAssignedTo" asp-for="Bug.AssignedTo">
+                                <option selected>Choose...</option>
+                                @foreach (var item in Model.Users)
+                                {
+                                    <option value="@item.FirstName @item.LastName">@item.FirstName @item.LastName</option>
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Bug</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@if (Model.Bugs.Count <= 0)
+{
+    <h2 class="text-info text-center">No bugs have been reported, add one to get started.</h2>
+}
+else
+{
+    <table class="table table-striped table-light">
+        <thead>
+            <tr>
+                <th scope="col">#ID</th>
+                <th scope="col">Type</th>
+                <th scope="col">Description</th>
+                <th scope="col">Priority</th>
+                <th scope="col">Assignee</th>
+                <th scope="col">Submitted By</th>
+                <th scope="col">Report Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                foreach (var item in Model.Bugs)
+                {
+                    if (!item.isResolved)
+                    {
+            <tr>
+                <th scope="row">@Html.DisplayFor(modelItem => item.Id)</th>
+                <td>@Html.DisplayFor(modelItem => item.Type)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                @if (item.Priority == 0)
+                {
+                    <td>Critical</td>
+                }
+                @if (item.Priority == 1)
+                {
+                    <td>High</td>
+                }
+                @if (item.Priority == 2)
+                {
+                    <td>Normal</td>
+                }
+                @if (item.Priority == 3)
+                {
+                    <td>Low</td>
+                }
+                <td>@Html.DisplayFor(modelItem => item.AssignedTo)</td>
+                <td>@Html.DisplayFor(modelItem => item.SubmittedBy)</td>
+                <td>@Html.DisplayFor(modelItem => item.CreatedOn.Date)</td>
+                <td>
+                    @using (Html.BeginForm("Delete", "Bugs"))
+                    {
+                        <input type="hidden" name="Id" value="@item.Id" />
+                        <input type="submit" value="Resolve" class="btn btn-success" />
+                    }
+                </td>
+            </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+}
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" style="background-color: #2C5364">
+    Submit New Bug
+</button>

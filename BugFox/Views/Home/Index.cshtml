@@ -1,0 +1,167 @@
+﻿@model BugFox.ViewModels.DashboardViewModel
+<h1 class="text-info">Dashboard</h1>
+<br />
+@if (Model.Bugs.Count <= 0)
+{
+    <h2 class="text-info">There is no data to display.  Please navigate to the 'Issues' page and report something so Bug Fox can begin tracking data.</h2>
+}
+else
+{
+    <div class="container" style="display:block; overflow: auto; box-shadow: 0 0 0 2pt #f2f2f2; background-color: #f8f8f8; border-radius: 10px">
+        <div class="col-12">
+            <div class="float-left" style="min-width: 500px">
+                <canvas id="dashboard-doughnut-1">
+                </canvas>
+            </div>
+            <div class="float-left" style="min-width: 500px">
+                <canvas id="dashboard-doughnut-2">
+                </canvas>
+            </div>
+        </div>
+        <div class="row col-12" style="height: 40px"></div>
+        <div class="col-12">
+            <div class="float-left" style="min-width: 500px">
+                <canvas id="dashboard-bar-1">
+                </canvas>
+            </div>
+            <div class="float-left pre-scrollable" style="min-width: 500px; border-radius: 10px; height: 250px; margin: 25px;">
+                <h4 class="text-info text-center">Assigned Bugs</h4>
+                <ul style="list-style-type: none">
+                    @if (Model.BugsForUser.Count <= 0)
+                    {
+                        <li>
+                            <h5 class="text-info">You have no assigned bugs.</h5>
+                        </li>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.BugsForUser)
+                        {
+                            <li>
+                                <div class="card" style="width: 400px; margin-bottom: 20px">
+                                    @if (item.Priority == 0)
+                                    {
+                                        <div class="card-header" style="background: #c74d4c">
+                                            <h5 class="card-title">@item.Type</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">#@item.Id</h6>
+                                        </div>
+                                    }
+                                    @if (item.Priority == 1)
+                                    {
+                                        <div class="card-header" style="background: #f3a25f">
+                                            <h5 class="card-title">@item.Type</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">#@item.Id</h6>
+                                        </div>
+                                    }
+                                    @if (item.Priority == 2)
+                                    {
+                                        <div class="card-header" style="background: #f0ed78">
+                                            <h5 class="card-title">@item.Type</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">#@item.Id</h6>
+                                        </div>
+                                    }
+                                    @if (item.Priority == 3)
+                                    {
+                                        <div class="card-header" style="background: #46bf7e">
+                                            <h5 class="card-title">@item.Type</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">#@item.Id</h6>
+                                        </div>
+                                    }
+                                    <div class="card-body">
+                                        <p class="card-text">@item.Description</p>
+                                        @if (item.Priority == 0)
+                                        {
+                                            <i class="fas fa-bug" style="color: red"></i>
+                                        }
+                                        @if (item.Priority == 1)
+                                        {
+                                            <i class="fas fa-bug" style="color: orange"></i>
+                                        }
+                                        @if (item.Priority == 2)
+                                        {
+                                            <i class="fas fa-bug" style="color: yellow"></i>
+                                        }
+                                        @if (item.Priority == 3)
+                                        {
+                                            <i class="fas fa-bug" style="color: green"></i>
+                                        }
+                                        <a href="#" class="card-link">View More...</a>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts{
+    <script type="text/javascript">
+        const model = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model));
+        var dashboardChart1 = document.getElementById('dashboard-doughnut-1').getContext('2d');
+        var dashboardChart2 = document.getElementById('dashboard-doughnut-2').getContext('2d');
+        var dashboardChart3 = document.getElementById('dashboard-bar-1').getContext('2d');
+        var chart1 = new Chart(dashboardChart1, {
+            // The type of chart we want to create
+            type: 'doughnut',
+
+            // The data for our dataset
+            data: {
+                labels: ['Critical', 'High', 'Normal', 'Low'],
+                datasets: [{
+                    label: 'Bugs by Priority',
+                    backgroundColor: [
+                        '#c74d4c',
+                        '#f3a25f',
+                        '#f0ed78',
+                        '#46bf7e'
+                    ],
+                    data: [model.CriticalCount, model.HighCount, model.NormalCount, model.LowCount]
+                }]
+            },
+
+            // Configuration options go here
+            options: {}
+        });
+        var chart2 = new Chart(dashboardChart2, {
+            // The type of chart we want to create
+            type: 'doughnut',
+
+            // The data for our dataset
+            data: {
+                labels: ['Resolved', 'Unresolved'],
+                datasets: [{
+                    label: 'Bug Completion',
+                    backgroundColor: [
+                        '#46bf7e',
+                        '#c74d4c'
+                    ],
+                    data: [model.ResolvedCount, model.UnresolvedCount]
+                }]
+            },
+
+            // Configuration options go here
+            options: {}
+        });
+
+        var chart3 = new Chart(dashboardChart3, {
+            // The type of chart we want to create
+            type: 'line',
+
+            // The data for our dataset
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'Bug Reports',
+                    backgroundColor: '#2C5364',
+                    borderColor: 'white',
+                    data: [model.JanCount, model.FebCount, model.MarCount, model.AprCount, model.MayCount, model.JunCount, model.JulCount]
+                }]
+            },
+
+            // Configuration options go here
+            options: {}
+        });
+    </script>
+}
